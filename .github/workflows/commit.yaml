@@ -1,0 +1,37 @@
+name: commit
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - "CHANGELOG.md"
+
+jobs:
+  lint-go:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v3
+        with:
+          go-version: "^1.20"
+      - uses: golangci/golangci-lint-action@v3
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v3
+        with:
+          go-version: "^1.20"
+      - name: tests
+        run: go test -v ./...
+
+  release:
+    needs: [lint-go, test]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: joaofnds/semantic-release-action@v1.1.0
+        with:
+          plugins: "@semantic-release/changelog @semantic-release/git conventional-changelog-conventionalcommits"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
