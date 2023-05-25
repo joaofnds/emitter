@@ -232,7 +232,7 @@ func (e *Emitter) Emit(topic string, args ...interface{}) chan struct{} {
 	Loop:
 		for i := len(listeners) - 1; i >= 0; i-- {
 			lstnr := listeners[i]
-			evn := *(&event) // copy the event
+			evn := event // copy the event
 			applyMiddlewares(&evn, lstnr.middlewares)
 
 			if (evn.Flags | FlagVoid) == evn.Flags {
@@ -262,7 +262,7 @@ func (e *Emitter) Emit(topic string, args ...interface{}) chan struct{} {
 	}
 	if haveToWait {
 		go func(done chan struct{}) {
-			defer func() { recover() }()
+			defer func() { _ = recover() }()
 			wg.Wait()
 			close(done)
 		}(done)
